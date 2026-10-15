@@ -1,13 +1,22 @@
 {
   "name": "hekouwang-writer-skill",
   "displayName": "会勇禾口王 · 写作技能",
-  "version": "1.1.0",
-  "tagline": "把任何素材写成结构清晰、内容易懂、数字可对账的中文文档",
-  "description": "文档写作与改进技能：WRITE 五步法+澄清清单、修订模式、句法纪律（一句一事/45-60字阈值/一词一义/模态保留）、去AI味（锯末词/G1-G5/P1-P3）、证据纪律（出处铁律/出口闸门两问）、四把机械检查脚本（只报告不修改，全带 --selftest）、learnings 自进化台账。适用办事指南/方案/报告/说明/邮件/汇报及文档体检。",
+  "version": "1.2.0",
+  "tagline": "中文文档写作与体检，外加公众号文章/文案的去 AI 味（文章模式）",
+  "description": "文档写作与改进技能：WRITE 五步法+澄清清单、修订模式、句法纪律（一句一事/45-60字阈值/一词一义/模态保留）、去AI味（锯末词/G1-G5/P1-P3）、证据纪律（出处铁律/出口闸门两问）、四把机械检查脚本（只报告不修改，全带 --selftest）、learnings 自进化台账。适用办事指南/方案/报告/说明/邮件/汇报及文档体检。文章模式（原 hekouwang-deai-skill）：公众号文章、长文章母版、文案先诊断再改写去 AI 味，补作者真实在场的第一人称，保留事实、原意和信息密度。",
   "author": "会勇禾口王",
   "license": "MIT-0",
   "category": "writing",
-  "tags": ["文档写作", "结构化", "去AI味", "句法纪律", "文档体检", "数字对账", "中文写作"],
+  "tags": [
+    "文档写作",
+    "结构化",
+    "去AI味",
+    "句法纪律",
+    "文档体检",
+    "数字对账",
+    "中文写作",
+    "人性化"
+  ],
   "requires_api_key": false,
   "scripts": [
     "scripts/sawdust_scan.py",
@@ -22,6 +31,7 @@
     "references/deai-flavor.md",
     "references/evidence-and-delivery.md",
     "references/clarify-questions.md",
-    "references/glossary.md"
+    "references/glossary.md",
+    "references/article-mode.md"
   ]
 }

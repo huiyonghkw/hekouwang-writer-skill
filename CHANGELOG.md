@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.0（2026-10-15）
+
+- **并入 hekouwang-deai-skill，新增文章模式**（SKILL.md 1.3 节、`references/article-mode.md`）：公众号文章、长文章母版、文案的去 AI 味。六类诊断（没有"我"、破折号过多、工整对仗、无据拔高词、章节符号、空泛总结或产品页腔调）+ `sawdust_scan.py`；改写补 2–4 处作者真实在场的第一人称锚点，素材里没有就问，不编经历；输出诊断清单 → 改写文本 → 事实保留说明 → 锚点数。
+- 文档模式不补第一人称。description 加入去AI味、人性化、润色文章/文案、`/deai` 触发词，去掉"交给 hekouwang-deai-skill"的边界。
+- 会勇禾口王内容工作流的 `/deai` 入口、运行时合同和外部依赖清单改指向本 skill。
+
 ## v1.1.0（2026-10-15）
 
 - 修复：`sentence_load.py`、`doc_lint.py` 省略文件参数、从 stdin 读文本时崩溃（`texts` 未初始化）。

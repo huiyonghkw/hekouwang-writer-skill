@@ -4,7 +4,7 @@
 
 ## 30 秒速览
 
-- 产品：中文文档写作/体检 skill。技术栈：Markdown + Python 3 stdlib 脚本，零依赖。
+- 产品：中文写作 skill，文档模式（写作/体检）+ 文章模式（去 AI 味，原 hekouwang-deai-skill）。技术栈：Markdown + Python 3 stdlib 脚本，零依赖。
 - 新内容放哪：规则细节 → `references/`；可执行检查 → `scripts/`；`SKILL.md` 只放铁律、路由和指针。
 
 ## 铁律
