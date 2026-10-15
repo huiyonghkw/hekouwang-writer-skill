@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.0（2026-10-15）
+
+- 修复：`sentence_load.py`、`doc_lint.py` 省略文件参数、从 stdin 读文本时崩溃（`texts` 未初始化）。
+- `sentence_load.py` 新增 `--json` 输出（over / warn_items / stacked / nested / hard），selftest 增至 6 项。
+- 四把检查器的 stdin + `--json` 定为对外接口，字段只增不改。dianping-review-skill 1.2.0 起在运行时依赖本 skill，用它的规则拦截点评文案。
+
 ## v1.0.0（2026-10-15）
 
 初版。发布前将 P0/P1/P2 改进全部并入，**未升版本号**（从未推送远程，无历史包袱）。

@@ -49,6 +49,19 @@ AI 写的文档常见五宗罪：结论埋在第六节、一段塞三个事实�
 
 改动脚本前先跑 `python3 scripts/<脚本>.py --selftest`。
 
+## 被其他 skill 调用
+
+四把检查器都支持从 stdin 读文本、`--json` 输出，字段只增不改，可以当接口用：
+
+```bash
+echo "$TEXT" | python3 "$SKILL_DIR/scripts/sawdust_scan.py" --json    # over / density / findings
+echo "$TEXT" | python3 "$SKILL_DIR/scripts/sentence_load.py" --json   # over / warn_items / stacked / hard
+echo "$TEXT" | python3 "$SKILL_DIR/scripts/doc_lint.py" --json        # hard_errors / warnings
+echo "$TEXT" | python3 "$SKILL_DIR/scripts/check_fidelity.py" --json  # errors
+```
+
+已接入：[dianping-review-skill](https://github.com/huiyonghkw/dianping-review-skill) >= 1.2.0，它的内容检查按这里的规范拦截点评文案。
+
 ## 接入 git hook / CI
 
 ```bash

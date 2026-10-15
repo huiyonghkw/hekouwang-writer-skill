@@ -245,8 +245,8 @@ def main(argv=None):
             concept, words = p.split(":", 1)
             groups.append((concept.strip(), [w.strip() for w in words.split(",") if w.strip()]))
 
+    texts = []
     if args.files:
-        texts = []
         for f in args.files:
             try:
                 with open(f, encoding="utf-8") as fh:

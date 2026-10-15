@@ -20,6 +20,7 @@ UI 操作路径（含 →）、联系人/电话行、政策条款引用行。
 """
 
 import argparse
+import json
 import re
 import sys
 
@@ -114,14 +115,40 @@ def selftest():
         ("分号断句", "第一句话；第二句话。", lambda r: len(r[0]) == 2),
         ("堆叠检出", "甲，乙，丙，丁，戊，己，庚，这么多分句堆在一句里", lambda r: len(r[3]) == 1),
     ]
+    rep = report("<stdin>", long_sent, DEFAULT_WARN, DEFAULT_SPLIT)
+    good = rep["hard"] == 1 and rep["over"][0]["release"] is None
+    ok_json = good
+    print(f"  [{'PASS' if good else 'FAIL'}] JSON 结构（hard=1）")
     ok = True
     for name, text, check in cases:
         r = analyze(text, DEFAULT_WARN, DEFAULT_SPLIT)
         good = check(r)
         ok = ok and good
         print(f"  [{'PASS' if good else 'FAIL'}] {name}")
+    ok = ok and ok_json
     print("selftest:", "全部通过" if ok else "有失败项")
     return 0 if ok else 1
+
+
+def report(path, text, warn, split):
+    """单个文本的结构化结果（--json 输出与调用方都用它）。"""
+    sents, over, warn_l, stacked, nested = analyze(text, warn, split)
+
+    def items(lst):
+        return [{"line": ln, "len": n, "sentence": s, "release": kind} for ln, n, s, kind in lst]
+
+    return {
+        "path": path,
+        "sentences": len(sents),
+        "cjk": sum(cjk_len(s) for s, _ in sents),
+        "warn": warn,
+        "split": split,
+        "over": items(over),
+        "warn_items": items(warn_l),
+        "stacked": items(stacked),
+        "nested": items(nested),
+        "hard": len([e for e in over if not e[3]]),
+    }
 
 
 def main(argv=None):
@@ -129,14 +156,15 @@ def main(argv=None):
     ap.add_argument("files", nargs="*", help="待扫描文件；省略时读 stdin")
     ap.add_argument("--warn", type=int, default=DEFAULT_WARN, help="告警线字数")
     ap.add_argument("--split", type=int, default=DEFAULT_SPLIT, help="必拆线字数")
+    ap.add_argument("--json", action="store_true", help="JSON 输出")
     ap.add_argument("--selftest", action="store_true", help="运行内置自测")
     args = ap.parse_args(argv)
 
     if args.selftest:
         return selftest()
 
+    texts = []
     if args.files:
-        texts = []
         for f in args.files:
             try:
                 with open(f, encoding="utf-8") as fh:
@@ -147,25 +175,20 @@ def main(argv=None):
     else:
         texts.append(("<stdin>", sys.stdin.read()))
 
-    for path, text in texts:
-        sents = sentences(text)
-        total_cjk = sum(cjk_len(s) for s, _ in sents)
-        over, warn, stacked, nested = [], [], [], []
-        for sent, ln in sents:
-            n = cjk_len(sent)
-            kind = release_kind(sent)
-            entry = (ln, n, sent.strip(), kind)
-            if n >= args.split:
-                over.append(entry)
-            elif n >= args.warn:
-                warn.append(entry)
-            if sum(sent.count(c) for c in CLAUSE_CHARS) >= 5:
-                stacked.append(entry)
-            if sent.count("的") >= 3:
-                nested.append(entry)
+    if args.json:
+        out = [report(path, text, args.warn, args.split) for path, text in texts]
+        print(json.dumps(out[0] if len(out) == 1 else out, ensure_ascii=False, indent=2))
+        return 0
 
+    for path, text in texts:
+        r = report(path, text, args.warn, args.split)
+
+        def back(lst):
+            return [(e["line"], e["len"], e["sentence"], e["release"]) for e in lst]
+
+        over, warn, stacked, nested = back(r["over"]), back(r["warn_items"]), back(r["stacked"]), back(r["nested"])
         print(f"文件：{path}")
-        print(f"中文句子：{len(sents)} 句    中文字数：{total_cjk}")
+        print(f"中文句子：{r['sentences']} 句    中文字数：{r['cjk']}")
         print(f"档位阈值：告警 ≥{args.warn} 字　必拆 ≥{args.split} 字")
         print("-" * 64)
         print(f"【必拆线】≥{args.split} 字        {len(over)} 句")
@@ -188,7 +211,6 @@ def main(argv=None):
         show("分句堆叠", stacked)
         show("修饰嵌套", nested)
 
-        hard = [e for e in over if not e[3]]
         print()
         print("【判读纪律】以下多为可放行项，人工确认后再决定是否拆：")
         print("  1) 公式/等式链——拆开破坏可读性；")
@@ -196,8 +218,8 @@ def main(argv=None):
         print("  3) UI 操作路径、联系人/电话、政策条款引用——字数是硬的，拆了反而不通。")
         print("  修复方向只能是「重排与断句」，不得增删信息；拆句靠断句完成，")
         print("  不靠加「此外/因此/值得注意的是」。")
-        if hard:
-            print(f"\n⚠️ 有 {len(hard)} 句超过必拆线且无放行理由，请逐句处理。")
+        if r["hard"]:
+            print(f"\n⚠️ 有 {r['hard']} 句超过必拆线且无放行理由，请逐句处理。")
         else:
             print("\n✅ 超线句均有放行理由，或无不达标句。")
         print()
