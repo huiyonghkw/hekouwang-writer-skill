@@ -8,6 +8,8 @@
   - 「不是A，而是B」：先立一个没人说过的靶子再推倒，AI 最顺手的转折
   - 段末拔高：多句段落最后一句很短，又落在「才是/真正/本质/意义」这类词上
   - 三连排比：同一段里连续 3 个分句用同样的两个字开头
+  - 重复口径/免责：同一类限定（不替你选、以…为准、没算利息）在正文里说了 3 次以上，
+    属于防御性写作；「来源」「口径」标题之后的内容不计
 
 全部只报告、不改稿，由人判断。真人写作也会命中，看密度和组合，不看单条。
 
@@ -34,6 +36,15 @@ SKIP_LINE = re.compile(r"^\s*(\||#|---|\*\*\*|【插图|〖|!\[|::)")
 NOT_BUT = re.compile(r"(不是|并非|不在于)[^。！？!?]{1,24}?[，,]\s*(而是|而在于|是)")
 RATHER = re.compile(r"与其说[^。！？]{1,24}不如说")
 UPLIFT_WORDS = ("才是", "真正", "本质", "意义", "答案", "力量", "温度", "底气", "从来不是", "终将", "不止是", "价值所在")
+
+HEDGE_FAMILIES = (
+    ("免责", re.compile(r"不替(你|读者|大家)|不构成[^。！？]{0,8}建议|仅供参考|不是在(劝|推荐)|不作推荐|不荐")),
+    ("以…为准", re.compile(r"以[^。！？，,]{1,16}为准")),
+    ("计算口径", re.compile(r"(没|未|不)(算|计)[^。！？，,]{0,6}(利息|上调|涨|在内)|只算[^。！？，,]{1,10}(部分|账户)|按[^。！？，,]{0,6}岁(起领|领取)[^。！？，,]{0,4}算")),
+    ("不能推出", re.compile(r"不能(从|据|凭)[^。！？]{0,12}(推出|得出|推断)|不能当[^。！？，,]{1,10}(用|看|读)")),
+)
+SOURCE_HEAD = re.compile(r"^\s*#{1,6}\s*.*(来源|口径|参考资料|数据说明)")
+HEDGE_MAX = 2
 
 UNIFORM_CV = 0.35
 MIN_SENTENCES = 12
@@ -97,6 +108,27 @@ def split_sentences(para):
     if cjk_len(buf):
         sents.append(buf.strip())
     return sents
+
+
+def body_only(text):
+    """截掉「来源/口径」标题及之后的内容：那里本来就该集中写限定。"""
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if SOURCE_HEAD.match(line):
+            return "\n".join(lines[:i])
+    return text
+
+
+def find_hedges(text):
+    hits = []
+    for ln, line in enumerate(body_only(text).splitlines(), 1):
+        for family, rx in HEDGE_FAMILIES:
+            for m in rx.finditer(line):
+                hits.append({"line": ln, "family": family, "text": m.group(0)})
+    counts = {}
+    for h in hits:
+        counts[h["family"]] = counts.get(h["family"], 0) + 1
+    return hits, {k: v for k, v in counts.items() if v > HEDGE_MAX}
 
 
 def analyze(text):
@@ -167,6 +199,9 @@ def analyze(text):
     rhetoric = [p for p in parallel if p["kind"] == "排比"]
     if rhetoric:
         warnings.append(f"三连排比 {len(rhetoric)} 处")
+    hedges, hedge_repeat = find_hedges(text)
+    for family, n in hedge_repeat.items():
+        warnings.append(f"「{family}」类限定正文出现 {n} 次（> {HEDGE_MAX}）：首个关键数旁说一次、来源里说一次")
 
     return {
         "sentences": len(prose),
@@ -177,6 +212,8 @@ def analyze(text):
         "not_but_per_k": per_k,
         "uplift": uplift,
         "parallel": parallel,
+        "hedges": hedges,
+        "hedge_repeat": hedge_repeat,
         "warnings": warnings,
     }
 
@@ -204,6 +241,12 @@ def selftest():
         ("三连排比检出", "它是一种方法，它是一种态度，它是一种习惯。", lambda r: [p["kind"] for p in r["parallel"]] == ["排比"]),
         ("数字串单列", "交 200 元每月 1.73 元，交 300 元每月 2.48 元，交 1000 元每月 7.77 元。",
          lambda r: [p["kind"] for p in r["parallel"]] == ["数据串"] and not any("排比" in w for w in r["warnings"])),
+        ("重复免责检出", "这篇不替你选档。我不替你选。还是不替你选。再说一次不替你决定。",
+         lambda r: r["hedge_repeat"].get("免责") == 4),
+        ("两次限定不报", "金额以窗口核定为准。到账时间以短信为准。",
+         lambda r: not r["hedge_repeat"] and len(r["hedges"]) == 2),
+        ("来源节之后不计", "正文以窗口为准。\n\n## 来源与口径\n\n以A为准。以B为准。以C为准。",
+         lambda r: len(r["hedges"]) == 1 and not r["hedge_repeat"]),
         ("列表与插图不计句长", "- 第一项内容\n- 第二项内容\n\n【插图 1 · 01.png】", lambda r: r["sentences"] == 0),
     ]
     ok = True
@@ -228,6 +271,9 @@ def show(path, r):
         print(f"  L{item['line']:<5} 段末拔高：{item['text']}")
     for item in r["parallel"]:
         print(f"  L{item['line']:<5} 三连{item['kind']}：{item['text']}")
+    for item in r["hedges"]:
+        if item["family"] in r["hedge_repeat"]:
+            print(f"  L{item['line']:<5} 重复{item['family']}：{item['text']}")
     print("-" * 64)
     if r["warnings"]:
         for w in r["warnings"]:
