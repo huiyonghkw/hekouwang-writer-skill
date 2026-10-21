@@ -6,14 +6,14 @@
 
 ## 它解决什么问题
 
-AI 写的文档常见五宗罪：结论埋在第六节、一段塞三个事实、数字对不上、术语前后不一、"AI 味"扑面而来。本技能用一套可执行的流程 + 四把机械检查器治这五件事。
+AI 写的文档常见五宗罪：结论埋在第六节、一段塞三个事实、数字对不上、术语前后不一、"AI 味"扑面而来。本技能用一套可执行的流程 + 一组机械检查器治这五件事。
 
 ## 两种模式
 
 | 模式 | 对象 | 做什么 |
 |---|---|---|
 | 文档模式（默认） | 方案、报告、说明、办事指南、家庭文档、邮件、汇报 | 结构化写作、修订、文档体检；不补第一人称 |
-| 文章模式 | 公众号文章、长文章母版、文案 | 先诊断再改写去 AI 味：补 2–4 处作者真实在场的第一人称，处理破折号、对仗、拔高词；保留事实、原意和信息密度 |
+| 文章模式 | 公众号、头条、长文章母版 | 写正文：从研究包写成有内涵、讲大白话的文章（一句话说透的判断 + 转述测试、术语配人话、身边类比、声音样本）。去 AI 味：先诊断再分三档改写，补 2–4 处作者真实在场的第一人称；保留事实、原意和信息密度 |
 
 文章模式由原 hekouwang-deai-skill 并入（v1.2.0），`/deai` 入口改由本 skill 承接。
 
@@ -40,17 +40,19 @@ AI 写的文档常见五宗罪：结论埋在第六节、一段塞三个事实�
    ```bash
    python3 scripts/sawdust_scan.py   文档.md  # AI味（锯末词密度）
    python3 scripts/sentence_load.py  文档.md  # 长句/分句堆叠/修饰嵌套/分号
+   python3 scripts/rhythm_scan.py    文章.md  # 文章：节奏均匀/不是而是/段末拔高/排比
    python3 scripts/doc_lint.py       文档.md  # 表格列数/标题跳跃/同义词轮换/待核实项
    python3 scripts/check_fidelity.py 文档.md  # 数字对账：合计行/列、乘法、加法链
    ```
 3. 有告警逐条处理；放行项（公式/等式链/操作路径/联系人行）注明理由，不硬拆。
 
-## 四把检查器（只报告，不修改；纯 stdlib；全带 --selftest）
+## 检查器（只报告，不修改；纯 stdlib；全带 --selftest）
 
 | 脚本 | 查什么 | 硬错误退出码 1 |
 |---|---|---|
 | sawdust_scan.py | 锯末词密度（阈值 3 处/千字） | 否（advisory） |
 | sentence_load.py | 句长/分句堆叠/修饰嵌套 | 否（advisory） |
+| rhythm_scan.py | 结构层 AI 味：句长变异系数、等长连句、不是而是、段末拔高、三连排比 | 否（advisory） |
 | doc_lint.py | 表格列数一致性、标题层级跳跃（硬错误）；同义词轮换、敏感信息（告警） | **是** |
 | check_fidelity.py | 算术不一致（合计/乘法/加法链） | **是** |
 
@@ -60,11 +62,12 @@ AI 写的文档常见五宗罪：结论埋在第六节、一段塞三个事实�
 
 ## 被其他 skill 调用
 
-四把检查器都支持从 stdin 读文本、`--json` 输出，字段只增不改，可以当接口用：
+检查器都支持从 stdin 读文本、`--json` 输出，字段只增不改，可以当接口用：
 
 ```bash
 echo "$TEXT" | python3 "$SKILL_DIR/scripts/sawdust_scan.py" --json    # over / density / findings
 echo "$TEXT" | python3 "$SKILL_DIR/scripts/sentence_load.py" --json   # over / warn_items / stacked / hard
+echo "$TEXT" | python3 "$SKILL_DIR/scripts/rhythm_scan.py" --json     # length_cv / equal_runs / not_but / uplift / parallel / warnings
 echo "$TEXT" | python3 "$SKILL_DIR/scripts/doc_lint.py" --json        # hard_errors / warnings
 echo "$TEXT" | python3 "$SKILL_DIR/scripts/check_fidelity.py" --json  # errors
 ```
@@ -97,14 +100,18 @@ hekouwang-writer-skill/
 ├── references/
 │   ├── write-flow.md             # WRITE 操作卡 + 七种文档原型 + 进度卡模板
 │   ├── style-rules.md            # 句法纪律完整表 + 放行项判定流程
-│   ├── deai-flavor.md            # 锯末词表 + G1-G5 + P1-P3 + 自检清单
-│   ├── article-mode.md           # 文章模式：六类诊断 + 改写 + 输出格式（原 deai-skill）
+│   ├── deai-flavor.md            # AI 味成因 + 三级诊断 + 锯末词表 + G1-G5 + P1-P3 + 自检清单
+│   ├── article-mode.md           # 文章模式改写：七类诊断 + 事实账 + 三档改写 + 输出格式（原 deai-skill）
+│   ├── article-writing.md        # 文章模式写正文：内涵六来源 + 大白话八条 + 读者视角自查
+│   ├── plain-talk.md             # 大白话手册：术语三句话、六种不白、类比、不能改的东西
+│   ├── voice-samples.md          # 会勇禾口王声音样本（已发布原句 + 好在哪 + 不该学的）
 │   ├── evidence-and-delivery.md  # 证据三分 + 出口闸门 + 降级三件套 + learnings 格式
 │   ├── clarify-questions.md      # 动笔前澄清清单（分文体五问 + 三方向选择法）
 │   └── glossary.md               # 术语表机制（一词一义的数据源）
-├── scripts/                      # 四把检查器（原创实现）
+├── scripts/                      # 检查器（原创实现）
 │   ├── sawdust_scan.py           # 锯末词密度
 │   ├── sentence_load.py          # 句长/分句堆叠/修饰嵌套/分号
+│   ├── rhythm_scan.py            # 结构层 AI 味：节奏、不是而是、段末拔高、排比
 │   ├── doc_lint.py               # 表格列数/标题跳跃/同义词轮换/待核实项
 │   ├── check_fidelity.py         # 算术对账：合计行/列、乘法、加法链
 │   └── change_list.py            # 修订对账：改前/改后全部改动处 + 数字变动
@@ -136,6 +143,14 @@ SKILL.md 的 frontmatter `description` 已含触发词，加载后由"写文档/
 - **tencent-docs**（第4）：场景路由表
 - **self-improving-agent**（第5）：learnings 台账与晋升规则
 - **ASD-STE100 Issue 9**（2025-01）：受控语言标准本身
+
+文章模式 1.3.0 的写正文与结构层检查参考了以下公开 skill，文本与代码均为重写：
+
+- **zh-humanizer**（ClawHub @junci003）：AI 味是「太平均」、口语词不是味精、删名词测试、三档强度、分级诊断
+- **khazix-writer**（数字生命卡兹克）：知识顺手带出、先认领对方处境、扣主线句、读者视角终审
+- **李诞写作心法**（ClawHub @whyischen）：先破后立、一句话说清本质、转述测试
+- **说人话**（GitHub: morningisle/shuo-ren-hua）：术语三段式（是什么、能干嘛、有什么坑）
+- **Humanizer-zh / qu-ai-wei**：改写前记事实账、按作用判断连接词和三项列表
 
 ## 版本历史
 
