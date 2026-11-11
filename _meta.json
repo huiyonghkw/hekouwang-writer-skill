@@ -1,0 +1,19 @@
+{
+  "name": "hekouwang-writer-skill",
+  "displayName": "会勇禾口王 · 写作技能",
+  "version": "2.0.0",
+  "tagline": "付费中文写作质控：对得上账的文档与文章",
+  "description": "付费版。未购买时只显示购买与安装说明，不执行写作、检查或改写。",
+  "author": "会勇禾口王",
+  "license": "Proprietary",
+  "category": "writing",
+  "tags": [
+    "文档写作",
+    "文档体检",
+    "数字对账",
+    "去AI味"
+  ],
+  "requires_api_key": false,
+  "scripts": [],
+  "references": []
+}
