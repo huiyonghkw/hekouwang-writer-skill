@@ -301,3 +301,9 @@ html{scroll-padding-top:84px}
 :root[data-theme="dark"] .mini th{background:rgba(255,253,248,.045)}
 :root[data-theme="dark"] .proof-after .table th{background:rgba(255,253,248,.045)}
 :root[data-theme="dark"] .footer{background:var(--paper)}
+
+/* 无 class 的裸表格同样单行 */
+.table-wrap>table th,.table-wrap>table td{white-space:nowrap}
+
+/* 窄屏段尾孤行：短段落平衡断行 */
+.card p,.card li,.proof-card>p,.proof-main>p,.proof-reason p,.quote,.notice,.evidence-caption,.check-row span,.mini td,.proof-aside em,.proof-aside span,.statusbar span,.case-jump a{text-wrap:balance}
