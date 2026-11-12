@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="hekouwang-writer-skill">
+  <title>hekouwang-writer-skill</title>
+  <desc>深绿圆角方块，中央为竖点起笔的「文」字，取写作与文档检查之意。</desc>
+  <rect width="64" height="64" rx="16" fill="#0F5C4C"/>
+  <g fill="none" stroke="#F4F2EC" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 14.2v4.4" stroke-width="6.4"/>
+    <path d="M14.8 28.6h34.4" stroke-width="6.2"/>
+    <path d="M35.8 33.6 20.2 50.8" stroke-width="6.2"/>
+    <path d="M28.2 33.6 43.8 50.8" stroke-width="6.2"/>
+  </g>
+</svg>

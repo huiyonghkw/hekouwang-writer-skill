@@ -1,0 +1,108 @@
+/* Atelier 纸面 · 共享 token（首页与案例页共用） */
+/* 页面文案改动后重跑 docs/fonts/subset.sh；否则新字会回退到苹方。 */
+@font-face{
+  font-family:'HKW Sans SC';
+  src:url('fonts/hkw-sans-sc-subset.woff2?v=8') format('woff2-variations'),
+      url('fonts/hkw-sans-sc-subset.woff2?v=8') format('woff2');
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Plex Mono';
+  src:url('fonts/ibm-plex-mono-400.woff2?v=1') format('woff2');
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Plex Mono';
+  src:url('fonts/ibm-plex-mono-600.woff2?v=1') format('woff2');
+  font-weight:600;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Plex Mono';
+  src:url('fonts/ibm-plex-mono-700.woff2?v=1') format('woff2');
+  font-weight:700;
+  font-style:normal;
+  font-display:swap;
+}
+:root{
+  --ink:#141413;
+  --muted:#5c5b57;
+  --faint:#8a877d;
+  --paper:#f4f2ec;
+  --surface:#ffffff;
+  --line:#e6e2d8;
+  --line-strong:#d3cec3;
+  --accent:#0f5c4c;
+  --accent-soft:#e4f0ec;
+  --warn-bg:#f6efe4;
+  --warn-ink:#6a5330;
+  --radius:18px;
+  --shadow:0 20px 48px -34px rgba(20,20,19,.28);
+  --font: 'HKW Sans SC',-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  --mono: 'Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --num: -apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI','PingFang SC',sans-serif;
+  color-scheme:light;
+}
+/* ============ 系统暗色模式 ============ */
+
+:root[data-theme="dark"]{
+    --ink:#ece9e1;
+    --muted:#a8a49a;
+    --faint:#827e74;
+    --paper:#111513;
+    --surface:#191f1c;
+    --line:#2a312d;
+    --line-strong:#3b443f;
+    --accent:#6fbfa4;
+    --accent-soft:rgba(111,191,164,.13);
+    --warn-bg:rgba(216,176,106,.12);
+    --warn-ink:#d8b06a;
+    --shadow:0 24px 60px -40px rgba(0,0,0,.75);
+    color-scheme:dark;
+  }
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+:root[data-theme="dark"] body{
+  margin:0;
+  background-color:var(--paper);
+  background-image:radial-gradient(rgba(20,20,19,.038) 1px,transparent 1px);
+  background-size:24px 24px;
+  background-position:-1px -1px;
+  color:var(--ink);
+  font-family:var(--font);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+/* 纸纹：只保留极淡一层；柔光只留左上一点 */
+:root[data-theme="dark"] body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:radial-gradient(60% 42% at 8% -6%,rgba(15,92,76,.07),transparent 58%);
+}
+:root[data-theme="dark"] body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] body>*{position:relative;z-index:1}
+a:focus-visible,button:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+  border-radius:6px;
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+}
